@@ -1,0 +1,9 @@
+{
+  "name": "esp-lionel",
+  "version": "0.1.0",
+  "description": "ESPHome external component for Lionel TMCC integration",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lcasale/esp-lionel"
+  }
+}

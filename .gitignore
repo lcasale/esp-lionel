@@ -1,0 +1,82 @@
+# General
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node / JS
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+dist/
+build/
+eggs/
+env/
+venv/
+.venv/
+pip-log.txt
+.mypy_cache/
+.pytest_cache/
+
+# Virtual environment markers
+venv/
+ENV/
+
+# PlatformIO / ESPHome / embedded build artifacts
+.pio/
+.pioenvs/
+.cache/
+.build/
+libdeps/
+build_flags.json
+platformio.ini
+*.elf
+*.bin
+*.hex
+*.map
+*.bin.*
+
+# ESPHome and config secrets
+secrets.yaml
+.esphome/
+*.yaml.lock
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.VC.db
+
+# C/C++ build
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Logs
+*.log
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Misc
+*.swp
+*.tmp
+~$*
