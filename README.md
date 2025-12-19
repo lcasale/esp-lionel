@@ -40,7 +40,10 @@ Add the following to your ESPHome configuration:
 
 ```yaml
 external_components:
-  - source: github://lcasale/esp-lionel@main
+  - source:
+      type: git
+      url: https://github.com/lcasale/esp-lionel
+      ref: main
     components: [tmcc]
 ```
 
@@ -61,7 +64,10 @@ external_components:
 
 ```yaml
 external_components:
-  - source: github://lcasale/esp-lionel@main
+  - source:
+      type: git
+      url: https://github.com/lcasale/esp-lionel
+      ref: main
     components: [tmcc]
 
 uart:

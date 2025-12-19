@@ -13,7 +13,10 @@ esp32:
 
 # Import the TMCC external component from GitHub
 external_components:
-  - source: github://lcasale/esp-lionel@main
+  - source:
+      type: git
+      url: https://github.com/lcasale/esp-lionel
+      ref: main
     components: [tmcc]
 
 logger:
