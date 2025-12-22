@@ -66,8 +66,21 @@ void TMCCEngine::set_direction_reverse() {
 }
 
 void TMCCEngine::blow_horn() {
+  // #region agent log
+  ESP_LOGW(TAG, "[HYP-E] ===== BLOW_HORN CALLED =====");
+  ESP_LOGD(TAG, "[HYP-E] TMCCEngine::blow_horn called");
+  ESP_LOGD(TAG, "[HYP-E] bus_ pointer: %p, address_: %u", this->bus_, this->address_);
+  // #endregion
+
   if (this->bus_ != nullptr) {
+    // #region agent log
+    ESP_LOGD(TAG, "[HYP-E] Calling bus_->engine_action_tmcc1(address=%u, action=BLOW_HORN1)", this->address_);
+    // #endregion
     this->bus_->engine_action_tmcc1(this->address_, TMCCEngineAction::BLOW_HORN1);
+  } else {
+    // #region agent log
+    ESP_LOGE(TAG, "[HYP-E] bus_ is nullptr! Cannot send horn command");
+    // #endregion
   }
 }
 
@@ -199,8 +212,21 @@ void TMCCEngineHorn::dump_config() {
 }
 
 void TMCCEngineHorn::press_action() {
+  // #region agent log
+  ESP_LOGW(TAG, "[HYP-E] ===== HORN BUTTON PRESSED =====");
+  ESP_LOGD(TAG, "[HYP-E] TMCCEngineHorn::press_action called");
+  ESP_LOGD(TAG, "[HYP-E] engine_ pointer: %p", this->engine_);
+  // #endregion
+
   if (this->engine_ != nullptr) {
+    // #region agent log
+    ESP_LOGD(TAG, "[HYP-E] Calling engine_->blow_horn()");
+    // #endregion
     this->engine_->blow_horn();
+  } else {
+    // #region agent log
+    ESP_LOGE(TAG, "[HYP-E] engine_ is nullptr! Cannot blow horn");
+    // #endregion
   }
 }
 
