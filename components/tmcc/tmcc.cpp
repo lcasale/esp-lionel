@@ -1,6 +1,8 @@
 #include "tmcc.h"
 #include "esphome/core/log.h"
 #include "esphome/core/helpers.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 namespace tmcc {
 
@@ -59,8 +61,28 @@ void TMCCBus::send_tmcc1_frame(uint16_t word) {
            frame[0], frame[1], frame[2], frame[1], frame[2]);
   // #endregion
 
-  // Send the frame
-  this->uart_->write_array(frame, 3);
+  // Send the frame byte-by-byte with small delays between bytes
+  // Some RS-232 devices (like TMCC) require this for reliable reception
+  // This matches common Raspberry Pi serial implementations
+  // #region agent log
+  ESP_LOGD(TAG, "[HYP-G] Sending frame byte-by-byte with delays");
+  // #endregion
+  for (int i = 0; i < 3; i++) {
+    uint8_t byte_array[1] = {frame[i]};
+    this->uart_->write_array(byte_array, 1);
+    // Small delay between bytes to ensure proper RS-232 signal timing
+    // At 9600 baud, one byte takes ~1ms, but we add a small margin
+    if (i < 2) {  // Don't delay after last byte
+      vTaskDelay(pdMS_TO_TICKS(2));  // 2ms delay between bytes
+      // #region agent log
+      ESP_LOGD(TAG, "[HYP-G] Sent byte %d: 0x%02X, waiting 2ms", i, frame[i]);
+      // #endregion
+    } else {
+      // #region agent log
+      ESP_LOGD(TAG, "[HYP-G] Sent byte %d: 0x%02X (last byte)", i, frame[i]);
+      // #endregion
+    }
+  }
 
   // #region agent log
   ESP_LOGD(TAG, "[HYP-A] After write_array, calling flush");
@@ -72,6 +94,17 @@ void TMCCBus::send_tmcc1_frame(uint16_t word) {
 
   // #region agent log
   ESP_LOGD(TAG, "[HYP-A] After flush complete");
+  // #endregion
+
+  // Add delay to ensure transmission completes and MAX3232/RS-232 line stabilizes
+  // TMCC may need time to process the frame. At 9600 baud, 3 bytes = ~3ms, but we add extra margin
+  // #region agent log
+  ESP_LOGD(TAG, "[HYP-F] Adding 10ms delay after transmission");
+  // #endregion
+  vTaskDelay(pdMS_TO_TICKS(10));  // 10ms delay
+
+  // #region agent log
+  ESP_LOGD(TAG, "[HYP-F] Delay complete");
   // #endregion
 
   // Log in binary format
