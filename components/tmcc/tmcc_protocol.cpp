@@ -64,8 +64,12 @@ uint16_t tmcc_make_word(TMCCObjectType type, uint8_t address, TMCCCommandClass c
 }
 
 uint16_t tmcc_engine_action_word(uint8_t address, TMCCEngineAction action) {
-  return tmcc_make_word(TMCCObjectType::ENGINE, address, TMCCCommandClass::ACTION,
-                        static_cast<uint8_t>(action));
+  uint16_t word = tmcc_make_word(TMCCObjectType::ENGINE, address, TMCCCommandClass::ACTION,
+                                 static_cast<uint8_t>(action));
+  // #region agent log
+  // Note: Logging here would require including log.h, but we'll log in the caller instead
+  // #endregion
+  return word;
 }
 
 uint16_t tmcc_engine_speed_word(uint8_t address, uint8_t speed) {
