@@ -23,6 +23,7 @@ CONF_FRONT_COUPLER = "front_coupler"
 CONF_REAR_COUPLER = "rear_coupler"
 CONF_BOOST = "boost"
 CONF_BRAKE = "brake"
+CONF_STOP = "stop"
 CONF_TEST_BUTTON = "test_button"
 
 # Create namespace
@@ -39,6 +40,7 @@ TMCCEngineFrontCoupler = tmcc_ns.class_("TMCCEngineFrontCoupler", button.Button,
 TMCCEngineRearCoupler = tmcc_ns.class_("TMCCEngineRearCoupler", button.Button, cg.Component)
 TMCCEngineBoost = tmcc_ns.class_("TMCCEngineBoost", button.Button, cg.Component)
 TMCCEngineBrake = tmcc_ns.class_("TMCCEngineBrake", button.Button, cg.Component)
+TMCCEngineStop = tmcc_ns.class_("TMCCEngineStop", button.Button, cg.Component)
 TMCCTestButton = tmcc_ns.class_("TMCCTestButton", button.Button, cg.Component)
 
 
@@ -78,6 +80,10 @@ ENGINE_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_BRAKE): cv.maybe_simple_value(
             button.button_schema(TMCCEngineBrake),
+            key=CONF_NAME,
+        ),
+        cv.Optional(CONF_STOP): cv.maybe_simple_value(
+            button.button_schema(TMCCEngineStop),
             key=CONF_NAME,
         ),
     }
@@ -186,4 +192,11 @@ async def to_code(config):
             brake_entity = await button.new_button(brake_config)
             await cg.register_component(brake_entity, brake_config)
             cg.add(brake_entity.set_engine(engine))
+
+        # Create stop button entity (system halt)
+        if CONF_STOP in engine_config:
+            stop_config = engine_config[CONF_STOP]
+            stop_entity = await button.new_button(stop_config)
+            await cg.register_component(stop_entity, stop_config)
+            cg.add(stop_entity.set_engine(engine))
 

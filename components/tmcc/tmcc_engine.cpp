@@ -110,6 +110,13 @@ void TMCCEngine::brake() {
   }
 }
 
+void TMCCEngine::stop() {
+  ESP_LOGW(TAG, "STOP: Sending system halt command");
+  if (this->bus_ != nullptr) {
+    this->bus_->system_halt();
+  }
+}
+
 uint8_t TMCCEngine::get_address() const {
   return this->address_;
 }
@@ -318,6 +325,28 @@ void TMCCEngineBrake::dump_config() {
 void TMCCEngineBrake::press_action() {
   if (this->engine_ != nullptr) {
     this->engine_->brake();
+  }
+}
+
+// ============================================================================
+// TMCCEngineStop implementation
+// ============================================================================
+
+void TMCCEngineStop::set_engine(TMCCEngine *engine) {
+  this->engine_ = engine;
+}
+
+void TMCCEngineStop::dump_config() {
+  LOG_BUTTON("", "TMCC Engine Stop", this);
+  ESP_LOGCONFIG(TAG, "  Sends System Halt command to stop all trains");
+}
+
+void TMCCEngineStop::press_action() {
+  ESP_LOGW(TAG, "STOP button pressed - halting all trains!");
+  if (this->engine_ != nullptr) {
+    this->engine_->stop();
+  } else {
+    ESP_LOGE(TAG, "engine_ is nullptr! Cannot send stop command");
   }
 }
 

@@ -127,6 +127,13 @@ void TMCCBus::engine_speed_absolute_tmcc1(uint8_t address, uint8_t speed) {
   this->send_tmcc1_frame(word);
 }
 
+void TMCCBus::system_halt() {
+  // System Halt command: 0xFFFF (all bits set)
+  // This matches the Python code: bytes([0xFE, 0b11111111, 0b11111111])
+  ESP_LOGW(TAG, "SYSTEM HALT - Stopping all trains!");
+  this->send_tmcc1_frame_repeated(0xFFFF, 10);  // Send multiple times for reliability
+}
+
 void TMCCBus::send_test_pattern() {
   // Send test patterns to verify UART is working
   ESP_LOGW(TAG, "=== SENDING TEST PATTERN ===");

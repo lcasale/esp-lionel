@@ -119,6 +119,19 @@ class TMCCEngineBrake : public esphome::button::Button, public esphome::Componen
 };
 
 /**
+ * Stop button - sends TMCC System Halt command to stop all trains.
+ */
+class TMCCEngineStop : public esphome::button::Button, public esphome::Component {
+ public:
+  void set_engine(TMCCEngine *engine);
+  void dump_config() override;
+
+ protected:
+  void press_action() override;
+  TMCCEngine *engine_{nullptr};
+};
+
+/**
  * Diagnostic test button - sends test pattern for UART debugging.
  */
 class TMCCTestButton : public esphome::button::Button, public esphome::Component {
@@ -160,6 +173,7 @@ class TMCCEngine : public esphome::Component {
   void open_rear_coupler();
   void boost();
   void brake();
+  void stop();  // System halt - stops all trains
 
   // Getters
   uint8_t get_address() const;

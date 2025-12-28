@@ -13,7 +13,8 @@ This ESPHome external component allows you to control Lionel TMCC-equipped train
 - **Horn**: Blow the locomotive horn
 - **Bell**: Ring the locomotive bell
 - **Couplers**: Open front and rear couplers
-- **Boost/Brake**: Speed boost and emergency brake
+- **Boost/Brake**: Speed boost and brake
+- **Stop**: Emergency stop - halts all trains (System Halt command)
 
 ## Hardware Requirements
 
@@ -85,6 +86,7 @@ tmcc:
     max_speed: 18     # Maximum speed limit (1-31, default: 18)
     speed:
       name: "Train Speed"
+      icon: "mdi:speedometer"
     direction:
       name: "Train Direction"
     horn:
@@ -99,6 +101,8 @@ tmcc:
       name: "Train Boost"
     brake:
       name: "Train Brake"
+    stop:
+      name: "Train Stop"
 ```
 
 ### Configuration Options
@@ -124,6 +128,7 @@ tmcc:
 | `rear_coupler` | Button Schema | No | - | Rear coupler button entity |
 | `boost` | Button Schema | No | - | Boost button entity |
 | `brake` | Button Schema | No | - | Brake button entity |
+| `stop` | Button Schema | No | - | Stop button entity (System Halt - stops all trains) |
 
 ## Home Assistant Integration
 
@@ -131,7 +136,7 @@ Once the ESP32 is flashed and connected to Home Assistant via the ESPHome integr
 
 - **Number**: Train Speed (0 to max_speed)
 - **Switch**: Train Direction (ON = Forward, OFF = Reverse)
-- **Buttons**: Horn, Bell, Front Coupler, Rear Coupler, Boost, Brake
+- **Buttons**: Horn, Bell, Front Coupler, Rear Coupler, Boost, Brake, Stop
 
 ### Example Automation
 

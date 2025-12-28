@@ -92,6 +92,7 @@ tmcc:
     max_speed: 18
     speed:
       name: "${friendly_name} Speed"
+      icon: "mdi:speedometer"
     direction:
       name: "${friendly_name} Direction"
     horn:
@@ -106,3 +107,5 @@ tmcc:
       name: "${friendly_name} Boost"
     brake:
       name: "${friendly_name} Brake"
+    stop:
+      name: "${friendly_name} Stop"
