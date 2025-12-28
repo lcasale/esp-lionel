@@ -23,6 +23,7 @@ CONF_FRONT_COUPLER = "front_coupler"
 CONF_REAR_COUPLER = "rear_coupler"
 CONF_BOOST = "boost"
 CONF_BRAKE = "brake"
+CONF_TEST_BUTTON = "test_button"
 
 # Create namespace
 tmcc_ns = cg.esphome_ns.namespace("tmcc")
@@ -38,6 +39,7 @@ TMCCEngineFrontCoupler = tmcc_ns.class_("TMCCEngineFrontCoupler", button.Button,
 TMCCEngineRearCoupler = tmcc_ns.class_("TMCCEngineRearCoupler", button.Button, cg.Component)
 TMCCEngineBoost = tmcc_ns.class_("TMCCEngineBoost", button.Button, cg.Component)
 TMCCEngineBrake = tmcc_ns.class_("TMCCEngineBrake", button.Button, cg.Component)
+TMCCTestButton = tmcc_ns.class_("TMCCTestButton", button.Button, cg.Component)
 
 
 # Engine configuration schema
@@ -87,6 +89,10 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(): cv.declare_id(TMCCBus),
         cv.Required(CONF_UART_ID): cv.use_id(uart.UARTComponent),
         cv.Optional(CONF_ENGINE): ENGINE_SCHEMA,
+        cv.Optional(CONF_TEST_BUTTON): cv.maybe_simple_value(
+            button.button_schema(TMCCTestButton),
+            key=CONF_NAME,
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -99,6 +105,13 @@ async def to_code(config):
     # Get UART and attach to bus
     uart_component = await cg.get_variable(config[CONF_UART_ID])
     cg.add(bus.set_uart(uart_component))
+
+    # Create test button if configured
+    if CONF_TEST_BUTTON in config:
+        test_button_config = config[CONF_TEST_BUTTON]
+        test_button_entity = await button.new_button(test_button_config)
+        await cg.register_component(test_button_entity, test_button_config)
+        cg.add(test_button_entity.set_bus(bus))
 
     # Handle engine configuration
     if CONF_ENGINE in config:

@@ -45,6 +45,27 @@ ota:
     password: !secret ota_password
 
 # UART used to talk to the TMCC base (TMCC1 uses 9600 8N1)
+# 
+# TROUBLESHOOTING:
+# ----------------
+# If the train doesn't respond to commands:
+# 
+# 1. FIRST: Check if you even need the MAX3232!
+#    If your Raspberry Pi + USB-to-serial works WITHOUT a MAX3232, then
+#    your TMCC base likely expects TTL (3.3V/5V) levels, NOT RS-232.
+#    In that case, connect ESP32 TX (GPIO23) directly to TMCC RX pin.
+#
+# 2. If using MAX3232 with inverted signals, try these pin configs:
+#    Option A: Standard (default)
+#      tx_pin: GPIO23
+#    Option B: Inverted TX (some RS-232 adapters need this)
+#      tx_pin:
+#        number: GPIO23
+#        inverted: true
+#
+# 3. Try swapping TX/RX if nothing works
+#
+# 4. Enable UART debug to see what's actually being sent
 uart:
   - id: tmcc_uart
     tx_pin: GPIO23
@@ -52,10 +73,20 @@ uart:
     baud_rate: 9600
     parity: NONE
     stop_bits: 1
+    debug:
+      direction: TX
+      dummy_receiver: true
+      after:
+        bytes: 3
+      sequence:
+        - lambda: UARTDebug::log_hex(direction, bytes, ' ');
 
 # TMCC Controller configuration
 tmcc:
   uart_id: tmcc_uart
+  # Diagnostic test button - sends test pattern for UART debugging
+  test_button:
+    name: "${friendly_name} UART Test"
   engine:
     address: 1
     max_speed: 18

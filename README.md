@@ -167,12 +167,106 @@ This component implements the TMCC1 protocol:
 ## Troubleshooting
 
 ### No response from trains
-1. Verify UART wiring (TX/RX may need to be swapped)
-2. Check voltage levels between ESP32 and TMCC base
-3. Ensure TMCC base is powered and linked to track
-4. Verify engine address matches configuration
+
+#### Step 1: Determine your signal level requirements
+
+**IMPORTANT**: Before troubleshooting, answer this question:
+- What adapter did you use with your Raspberry Pi that WORKS?
+  - **USB-to-TTL adapter** (FTDI, CP2102, CH340 with bare pins/wires): Your TMCC base expects TTL levels (0-3.3V or 0-5V)
+  - **USB-to-RS232 adapter** (with DB9 connector): Your TMCC base expects RS-232 levels (±12V)
+
+If you used a USB-to-TTL adapter with Raspberry Pi:
+- **DO NOT use MAX3232** - connect ESP32 TX directly to TMCC RX
+- The MAX3232 converts to RS-232 levels which will NOT work if your base expects TTL
+
+If you used a USB-to-RS232 adapter with Raspberry Pi:
+- You DO need the MAX3232 between ESP32 and TMCC base
+
+#### Step 2: Verify wiring
+
+For MAX3232 module (like HiLetgo):
+
+```
+ESP32          MAX3232 (TTL side)      MAX3232 (RS-232 side)      TMCC Base
+------         ------------------      ---------------------      ---------
+3.3V     -->   VCC
+GND      -->   GND
+GPIO23   -->   TXD (TTL input)         DB9 Pin 3 (TXD)    -->     RX pin
+GPIO22   <--   RXD (TTL output)        DB9 Pin 2 (RXD)    <--     TX pin
+                                       DB9 Pin 5 (GND)    -->     GND
+```
+
+**Note**: The labeling on MAX3232 modules can be confusing:
+- "TXD" on TTL side = data coming IN from microcontroller to be transmitted
+- "RXD" on TTL side = data going OUT to microcontroller (received from RS-232)
+
+#### Step 3: Try inverted signals
+
+Some RS-232 level converters or devices need inverted signals. Try this config:
+
+```yaml
+uart:
+  - id: tmcc_uart
+    tx_pin:
+      number: GPIO23
+      inverted: true
+    rx_pin: GPIO22
+    baud_rate: 9600
+    parity: NONE
+    stop_bits: 1
+```
+
+#### Step 4: Use the Test Button
+
+Add the test button to your config to send diagnostic patterns:
+
+```yaml
+tmcc:
+  uart_id: tmcc_uart
+  test_button:
+    name: "TMCC UART Test"
+```
+
+This sends test patterns you can observe with an oscilloscope/logic analyzer.
+
+#### Step 5: Enable UART Debug Output
+
+Add debug output to see exactly what bytes are being sent:
+
+```yaml
+uart:
+  - id: tmcc_uart
+    tx_pin: GPIO23
+    rx_pin: GPIO22
+    baud_rate: 9600
+    debug:
+      direction: TX
+      dummy_receiver: true
+      after:
+        bytes: 3
+      sequence:
+        - lambda: UARTDebug::log_hex(direction, bytes, ' ');
+```
+
+#### Step 6: Verify with loopback test
+
+Connect TX directly to RX on the ESP32 (GPIO23 to GPIO22) to verify UART is working:
+1. Add `dummy_receiver: true` to debug config
+2. Press the horn button
+3. You should see the bytes `FE 00 9C` appear in both TX and RX logs
+
+### Common Issues
+
+| Symptom | Likely Cause | Solution |
+|---------|--------------|----------|
+| No signal on TX pin | UART not configured | Check config, ensure GPIO23 is TX |
+| Signal on TX but train doesn't respond | Wrong voltage levels | Check if MAX3232 is needed/not needed |
+| Signal inverted | RS-232 polarity | Try `inverted: true` on tx_pin |
+| Bytes correct but no response | Wrong TMCC address | Verify engine address (default: 1) |
+| Intermittent response | Ground loop or noise | Ensure common ground, shorter wires |
 
 ### Debug logging
+
 Enable debug logging in your ESPHome configuration:
 
 ```yaml

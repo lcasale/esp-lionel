@@ -119,6 +119,19 @@ class TMCCEngineBrake : public esphome::button::Button, public esphome::Componen
 };
 
 /**
+ * Diagnostic test button - sends test pattern for UART debugging.
+ */
+class TMCCTestButton : public esphome::button::Button, public esphome::Component {
+ public:
+  void set_bus(TMCCBus *bus);
+  void dump_config() override;
+
+ protected:
+  void press_action() override;
+  TMCCBus *bus_{nullptr};
+};
+
+/**
  * TMCCEngine - Main engine controller component.
  *
  * This component holds the engine configuration and provides

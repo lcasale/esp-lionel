@@ -66,27 +66,23 @@ void TMCCEngine::set_direction_reverse() {
 }
 
 void TMCCEngine::blow_horn() {
-  // #region agent log
-  ESP_LOGW(TAG, "[HYP-E] ===== BLOW_HORN CALLED =====");
-  ESP_LOGD(TAG, "[HYP-E] TMCCEngine::blow_horn called");
-  ESP_LOGD(TAG, "[HYP-E] bus_ pointer: %p, address_: %u", this->bus_, this->address_);
-  // #endregion
+  ESP_LOGI(TAG, "blow_horn: address=%u", this->address_);
 
   if (this->bus_ != nullptr) {
-    // #region agent log
-    ESP_LOGD(TAG, "[HYP-E] Calling bus_->engine_action_tmcc1(address=%u, action=BLOW_HORN1)", this->address_);
-    // #endregion
-    this->bus_->engine_action_tmcc1(this->address_, TMCCEngineAction::BLOW_HORN1);
+    // The Python code sends the horn command 30 times for reliable reception!
+    // This is critical for the command to be recognized by the TMCC receiver.
+    this->bus_->engine_action_repeated_tmcc1(this->address_, TMCCEngineAction::BLOW_HORN1, 30);
   } else {
-    // #region agent log
-    ESP_LOGE(TAG, "[HYP-E] bus_ is nullptr! Cannot send horn command");
-    // #endregion
+    ESP_LOGE(TAG, "bus_ is nullptr! Cannot send horn command");
   }
 }
 
 void TMCCEngine::ring_bell() {
+  ESP_LOGI(TAG, "ring_bell: address=%u", this->address_);
+
   if (this->bus_ != nullptr) {
-    this->bus_->engine_action_tmcc1(this->address_, TMCCEngineAction::RING_BELL);
+    // Send bell command multiple times like horn for reliability
+    this->bus_->engine_action_repeated_tmcc1(this->address_, TMCCEngineAction::RING_BELL, 30);
   }
 }
 
@@ -212,21 +208,11 @@ void TMCCEngineHorn::dump_config() {
 }
 
 void TMCCEngineHorn::press_action() {
-  // #region agent log
-  ESP_LOGW(TAG, "[HYP-E] ===== HORN BUTTON PRESSED =====");
-  ESP_LOGD(TAG, "[HYP-E] TMCCEngineHorn::press_action called");
-  ESP_LOGD(TAG, "[HYP-E] engine_ pointer: %p", this->engine_);
-  // #endregion
-
+  ESP_LOGI(TAG, "Horn button pressed");
   if (this->engine_ != nullptr) {
-    // #region agent log
-    ESP_LOGD(TAG, "[HYP-E] Calling engine_->blow_horn()");
-    // #endregion
     this->engine_->blow_horn();
   } else {
-    // #region agent log
-    ESP_LOGE(TAG, "[HYP-E] engine_ is nullptr! Cannot blow horn");
-    // #endregion
+    ESP_LOGE(TAG, "engine_ is nullptr! Cannot blow horn");
   }
 }
 
@@ -332,6 +318,28 @@ void TMCCEngineBrake::dump_config() {
 void TMCCEngineBrake::press_action() {
   if (this->engine_ != nullptr) {
     this->engine_->brake();
+  }
+}
+
+// ============================================================================
+// TMCCTestButton implementation
+// ============================================================================
+
+void TMCCTestButton::set_bus(TMCCBus *bus) {
+  this->bus_ = bus;
+}
+
+void TMCCTestButton::dump_config() {
+  LOG_BUTTON("", "TMCC Test Button", this);
+  ESP_LOGCONFIG(TAG, "  Use this button to send a test pattern for UART debugging");
+}
+
+void TMCCTestButton::press_action() {
+  ESP_LOGW(TAG, "=== TEST BUTTON PRESSED ===");
+  if (this->bus_ != nullptr) {
+    this->bus_->send_test_pattern();
+  } else {
+    ESP_LOGE(TAG, "Cannot send test pattern: bus not configured");
   }
 }
 
