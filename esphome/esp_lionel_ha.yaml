@@ -73,13 +73,15 @@ uart:
     baud_rate: 9600
     parity: NONE
     stop_bits: 1
-    debug:
-      direction: TX
-      dummy_receiver: true
-      after:
-        bytes: 3
-      sequence:
-        - lambda: UARTDebug::log_hex(direction, bytes, ' ');
+    # Note: UART debug removed - it can cause memory issues when running for extended periods
+    # Uncomment below for temporary debugging:
+    # debug:
+    #   direction: TX
+    #   dummy_receiver: true
+    #   after:
+    #     timeout: 100ms
+    #   sequence:
+    #     - lambda: UARTDebug::log_hex(direction, bytes, ' ');
 
 # TMCC Controller configuration
 tmcc:

@@ -69,8 +69,7 @@ void TMCCEngine::blow_horn() {
   ESP_LOGI(TAG, "blow_horn: address=%u", this->address_);
 
   if (this->bus_ != nullptr) {
-    // The Python code sends the horn command 30 times for reliable reception!
-    // This is critical for the command to be recognized by the TMCC receiver.
+    // Send horn command 30 times - repetitions control the DURATION of the horn sound
     this->bus_->engine_action_repeated_tmcc1(this->address_, TMCCEngineAction::BLOW_HORN1, 30);
   } else {
     ESP_LOGE(TAG, "bus_ is nullptr! Cannot send horn command");
@@ -81,8 +80,8 @@ void TMCCEngine::ring_bell() {
   ESP_LOGI(TAG, "ring_bell: address=%u", this->address_);
 
   if (this->bus_ != nullptr) {
-    // Send bell command multiple times like horn for reliability
-    this->bus_->engine_action_repeated_tmcc1(this->address_, TMCCEngineAction::RING_BELL, 30);
+    // Bell is a toggle (on/off) - only needs to be sent once
+    this->bus_->engine_action_tmcc1(this->address_, TMCCEngineAction::RING_BELL);
   }
 }
 
